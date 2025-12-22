@@ -3,6 +3,11 @@ from django.contrib.auth.models import User
 
 
 class Issues(models.Model):
+    STATUS_OPEN = "OPEN"
+    STATUS_IN_PROGRESS = "IN_PROGRESS"
+    STATUS_RESOLVED = "RESOLVED"
+    STATUS_CLOSED = "CLOSED"
+
     SEVERITY_CHOICES = [
         ('CRITICAL', 'critical'),
         ('HIGH','high'),
@@ -13,8 +18,7 @@ class Issues(models.Model):
     STATUS_CHOICES = [
         ('OPEN','open'),
         ('IN_PROGRESS','in_progress'),
-        ('FIXED','fixed'),
-        ('VERIFIED','verified'),
+        ('RESOLVED','resolved'),
         ('CLOSED','closed'),
     ]
   

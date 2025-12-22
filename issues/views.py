@@ -12,18 +12,29 @@ class IssueViewSet(ModelViewSet):
 
     def get_queryset(self):
         user = self.request.user
+
          # Base queryset (replacement for queryset = Issue.objects.filter(...))
         queryset = Issues.objects.filter(is_deleted = False)
 
         # Admin & Support → all issues
         if user.groups.filter(name__in = ["Support", "Admin"]).exists():
             return queryset
+        
         # Developer → only assigned issues
         if user.groups.filter(name= "Developer").exists():
             return queryset.filter(assigned_to=user)
+        
          # Client → only own issues
         return queryset.filter(created_by=user)
+        
     
     def perform_create(self,serializer):
         serializer.save(created_by=self.request.user)
+
+    def get_serializer_context(self):
+        return super().get_serializer_context()
+        context["request"] = self.request
+        return context
+
+
     
