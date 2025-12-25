@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
 from django.conf import settings
+from django.utils import timezone
 
 
 class Issues(models.Model):
@@ -9,24 +10,37 @@ class Issues(models.Model):
     STATUS_RESOLVED = "RESOLVED"
     STATUS_CLOSED = "CLOSED"
 
+    PRIORITY_HIGH = "HIGH"
+    PRIORITY_MEDIUM = "MEDIUM"
+    PRIORITY_LOW = "LOW" 
+ 
+    PRIORITY_CHOICES = [
+        (PRIORITY_HIGH, "High"),
+        (PRIORITY_MEDIUM, "Medium"),
+        (PRIORITY_LOW, "Low")
+    ]
     SEVERITY_CHOICES = [
-        ('CRITICAL', 'critical'),
-        ('HIGH','high'),
-        ('MEDIUM','medium'),
-        ('LOW','low'),
+        ('CRITICAL', 'Critical'),
+        ('HIGH','High'),
+        ('MEDIUM','Medium'),
+        ('LOW','Low'),
     ]
 
     STATUS_CHOICES = [
-        ('OPEN','open'),
-        ('IN_PROGRESS','in_progress'),
-        ('RESOLVED','resolved'),
-        ('CLOSED','closed'),
+        (STATUS_OPEN,'Open'),
+        (STATUS_IN_PROGRESS,'In_Progress'),
+        (STATUS_RESOLVED,'Resolved'),
+        (STATUS_CLOSED,'Closed'),
     ]
   
     title = models.CharField(max_length=200)
     description = models.TextField()
     severity = models.CharField(max_length=10, choices= SEVERITY_CHOICES)
-    status = models.CharField(max_length=15, choices = STATUS_CHOICES,default='OPEN')
+    status = models.CharField(max_length=15, choices = STATUS_CHOICES, default=STATUS_OPEN)
+
+    priority =models.CharField(max_length=10, choices= PRIORITY_CHOICES, default=PRIORITY_MEDIUM)
+    due_at = models.DateTimeField(null=True, blank=True)
+    sla_breached = models.BooleanField(default=False)
 
     created_by = models.ForeignKey(User, on_delete = models.CASCADE,related_name='created_issues')
     assigned_to = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
@@ -98,4 +112,4 @@ class ChangeRequest(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"{self.field_name} changed for issue #{self.issue.id}"
+        return f"{self.field_name} changed Request (Issue ID: ({self.issue.id})"

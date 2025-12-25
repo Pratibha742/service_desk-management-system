@@ -9,6 +9,7 @@ from .models import ChangeRequest
 from .serializers import ChangeRequestSerializer
 from .serializers import IssueSerializer
 from .permissions import IsClient, IsDeveloper, IsSupportOrAdmin
+from .Utils import calculate_due_date
 
 
 class IssueViewSet(ModelViewSet):
@@ -75,6 +76,11 @@ class ChangeRequestViewSet(ModelViewSet):
         serializer.is_valid(raise_exception= True)
         serializer.save()
 
+        if field == "priority":
+            issue.due_at = calculate_due_date(change_request.new_value)
+            issue.sla_breached = False
+            issue.save() 
+
         change_request.status = ChangeRequest.STATUS_APPROVED
         change_request.approved_by = request.user
         change_request.save()
@@ -96,5 +102,7 @@ class ChangeRequestViewSet(ModelViewSet):
         change_request.save()
 
         return Response({"message": "Change Rejected"})
+    
+
 
     

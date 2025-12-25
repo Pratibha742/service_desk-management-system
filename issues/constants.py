@@ -1,3 +1,7 @@
+from datetime import timedelta
+
+
+
 ROLE_STATUS_TRANSITIONS = {
     "Client": {
         "RESOLVED" :["CLOSED"]
@@ -14,4 +18,11 @@ ROLE_STATUS_TRANSITIONS = {
         "RESOLVED": ["CLOSED"],
 
     }
+}
+
+SLA_RULES = {
+    "HIGH": timedelta(hours=4),
+    "MEDIUM": timedelta(hours=24),
+    "LOW": timedelta(hours=72)
+
 }

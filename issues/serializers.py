@@ -2,14 +2,15 @@ from rest_framework import serializers
 from .models import Issues
 from .models import ChangeRequest
 from .constants import ROLE_STATUS_TRANSITIONS
-from .Utils import get_user_role
+from .Utils import get_user_role, calculate_due_date
+
 
 class IssueSerializer(serializers.ModelSerializer):
     change_requests = serializers.SerializerMethodField(read_only= True)
     class Meta:
         model  = Issues
         fields = "__all__"
-        read_only_fields = ["id"]
+        read_only_fields = ["id","due_at","sla_breached"]
 
     def get_change_requests(self, obj):
         return ChangeRequestSerializer(
@@ -20,7 +21,10 @@ class IssueSerializer(serializers.ModelSerializer):
 
     def validate_status(self, new_status):
         request = self.context.get("request")
+        if not request:
+            return new_status
         user = request.user
+        
 
         issue = self.instance  #existing issue
         if not issue:
@@ -46,6 +50,15 @@ class IssueSerializer(serializers.ModelSerializer):
             )
         return new_status
     
+    def create(self, validated_data):
+        priority = validated_data.get("priority",Issues.PRIORITY_MEDIUM)
+
+        validated_data["due_at"] = calculate_due_date(priority)
+        validated_data["sla_breached"] = False
+
+        return super().create(validated_data)  
+    
+     
 class ChangeRequestSerializer(serializers.ModelSerializer):
     class Meta:
         model = ChangeRequest
